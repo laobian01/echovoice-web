@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+:root {
+  --font-sans: "SF Pro Display", "SF Pro Text", "PingFang SC", "Inter", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: #eff3ff;
+  background:
+    radial-gradient(70rem 45rem at 10% -15%, rgba(123, 97, 255, 0.42), transparent 60%),
+    radial-gradient(70rem 45rem at 90% 120%, rgba(53, 122, 255, 0.34), transparent 60%),
+    linear-gradient(140deg, #0c1230 0%, #121f54 42%, #17276d 100%);
+}
+
+a {
+  color: inherit;
+}
