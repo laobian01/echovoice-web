@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://echovoice.ai"),
+  metadataBase: new URL("https://echovoiceai.net"),
   title: "灵动之声 EchoVoice - AI 配音官网",
   description: "灵动之声 EchoVoice：角色、语调、情绪可控的中文 AI 配音工具，支持在线试用、订阅和加量包。",
   keywords: [
@@ -16,13 +16,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "灵动之声 EchoVoice",
     description: "30 秒生成高质量中文 AI 配音，支持网页端试用与会员订阅。",
-    url: "https://echovoice.ai",
+    url: "https://echovoiceai.net",
     siteName: "EchoVoice",
     locale: "zh_CN",
     type: "website",
   },
   alternates: {
-    canonical: "https://echovoice.ai",
+    canonical: "https://echovoiceai.net",
   },
 };
 

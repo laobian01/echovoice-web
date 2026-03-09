@@ -16,11 +16,21 @@ html, body {
 
 body {
   font-family: var(--font-sans);
-  color: #eff3ff;
+  color: #0f172a;
   background:
-    radial-gradient(70rem 45rem at 10% -15%, rgba(123, 97, 255, 0.42), transparent 60%),
-    radial-gradient(70rem 45rem at 90% 120%, rgba(53, 122, 255, 0.34), transparent 60%),
-    linear-gradient(140deg, #0c1230 0%, #121f54 42%, #17276d 100%);
+    radial-gradient(65rem 35rem at 10% -10%, rgba(109, 126, 255, 0.14), transparent 60%),
+    radial-gradient(70rem 40rem at 90% 115%, rgba(77, 148, 255, 0.12), transparent 65%),
+    linear-gradient(180deg, #f6f8ff 0%, #eef3ff 100%);
+}
+
+.page-wrap {
+  min-height: 100vh;
+}
+
+.surface {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(43, 71, 148, 0.08);
 }
 
 a {
