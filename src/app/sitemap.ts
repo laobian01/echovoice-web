@@ -12,12 +12,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/zh/support",
     "/zh/privacy",
     "/zh/terms",
+    "/zh/refund",
     "/en",
     "/en/try",
     "/en/pricing",
     "/en/support",
     "/en/privacy",
     "/en/terms",
+    "/en/refund",
   ];
 
   return paths.map((path) => ({
