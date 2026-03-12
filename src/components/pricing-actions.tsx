@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Locale } from "@/lib/i18n";
 
 async function goCheckout(plan: "monthly" | "pack100") {
-  const res = await fetch("/api/stripe/checkout", {
+  const res = await fetch("/api/paddle/checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ plan }),
@@ -42,7 +42,7 @@ export function PricingActions({ locale = "zh" }: { locale?: Locale }) {
         >
           <div className="text-lg font-semibold text-slate-900">{isEn ? "Pro Monthly" : "Pro 月订阅"}</div>
           <p className="mt-1 text-sm text-slate-600">{isEn ? "200 credits per month, renewable." : "每月 200 次额度，可持续更新。"}</p>
-          <div className="mt-3 text-xl font-bold text-indigo-700">$4.99 / {isEn ? "month" : "月"} ({isEn ? "sample" : "示例"})</div>
+          <div className="mt-3 text-xl font-bold text-indigo-700">$5.99 / {isEn ? "month" : "月"}</div>
         </button>
 
         <button
@@ -52,7 +52,7 @@ export function PricingActions({ locale = "zh" }: { locale?: Locale }) {
         >
           <div className="text-lg font-semibold text-slate-900">{isEn ? "Pack 100" : "加量包 100 次"}</div>
           <p className="mt-1 text-sm text-slate-600">{isEn ? "One-time purchase for extra credits." : "一次性购买，按需补充额度。"}</p>
-          <div className="mt-3 text-xl font-bold text-indigo-700">$2.99 ({isEn ? "sample" : "示例"})</div>
+          <div className="mt-3 text-xl font-bold text-indigo-700">$2.99</div>
         </button>
       </div>
 
