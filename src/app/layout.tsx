@@ -21,6 +21,11 @@ export const metadata: Metadata = {
     locale: "zh_CN",
     type: "website",
   },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/logo.png",
+  },
   alternates: {
     canonical: "https://echovoiceai.net",
   },

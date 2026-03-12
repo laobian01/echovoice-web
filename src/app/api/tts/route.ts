@@ -82,8 +82,7 @@ export async function POST(req: NextRequest) {
 
     const prompt = `朗读以下文本。角色设定: ${roleDescription}。情感: ${emotion}。语速: ${speedLabel(speed)}，语调: ${pitchLabel(pitch)}。文本: ${text}`;
 
-    const payload = {
-      receipt: "WEB_TRIAL",
+    const payload: Record<string, unknown> = {
       text: prompt,
       voiceConfig: {
         voiceConfig: {
@@ -91,6 +90,10 @@ export async function POST(req: NextRequest) {
         },
       },
     };
+    // Optional trial receipt for backend gating
+    if (process.env.ECHOVOICE_TRIAL_RECEIPT) {
+      payload.receipt = process.env.ECHOVOICE_TRIAL_RECEIPT;
+    }
 
     const upstream = await fetch(BACKEND_URL, {
       method: "POST",
