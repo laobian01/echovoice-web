@@ -8,6 +8,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const isEn = locale === "en";
   const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginMsg, setLoginMsg] = useState<string | null>(null);
@@ -28,9 +29,11 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
     if (!client) return;
     client.auth.getSession().then(({ data }) => {
       setSessionToken(data.session?.access_token || null);
+      setUserEmail(data.session?.user?.email || null);
     });
     const { data: sub } = client.auth.onAuthStateChange((_event, session) => {
       setSessionToken(session?.access_token || null);
+      setUserEmail(session?.user?.email || null);
     });
     return () => {
       sub.subscription.unsubscribe();
@@ -175,6 +178,10 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
           {loading ? (isEn ? "Generating..." : "生成中...") : (isEn ? "Generate & Play" : "生成并播放")}
         </button>
         {audioUrl ? <audio controls src={audioUrl} className="h-9" /> : null}
+        <span className={`rounded-full border px-3 py-1 text-xs ${sessionToken ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}`}>
+          {sessionToken ? (isEn ? "Logged in" : "已登录") : (isEn ? "Not logged in" : "未登录")}
+          {sessionToken && userEmail ? ` · ${userEmail}` : ""}
+        </span>
       </div>
 
       {error ? <p className="mt-3 text-sm text-rose-600">{isEn ? "Error: " : "错误："}{error}</p> : null}
