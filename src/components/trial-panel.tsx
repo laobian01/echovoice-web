@@ -9,6 +9,7 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const isEn = locale === "en";
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [trialRemaining, setTrialRemaining] = useState<number | null>(null);
   const [email, setEmail] = useState("");
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginMsg, setLoginMsg] = useState<string | null>(null);
@@ -98,6 +99,10 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
         const j = await trialRes.json().catch(() => null);
         throw new Error(j?.error || (isEn ? "Trial check failed" : "试用校验失败"));
       }
+      const trialJson = await trialRes.json().catch(() => null);
+      if (typeof trialJson?.remaining === "number") {
+        setTrialRemaining(trialJson.remaining);
+      }
 
       const res = await fetch("/api/tts", {
         method: "POST",
@@ -181,6 +186,7 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
         <span className={`rounded-full border px-3 py-1 text-xs ${sessionToken ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}`}>
           {sessionToken ? (isEn ? "Logged in" : "已登录") : (isEn ? "Not logged in" : "未登录")}
           {sessionToken && userEmail ? ` · ${userEmail}` : ""}
+          {sessionToken ? ` · ${isEn ? "Trials left" : "剩余试用"}: ${trialRemaining ?? "?"}` : ""}
         </span>
       </div>
 
