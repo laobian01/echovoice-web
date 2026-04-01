@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Locale } from "@/lib/i18n";
 
 async function goCheckout(plan: "monthly" | "pack100") {
-  const res = await fetch("/api/paddle/checkout", {
+  const res = await fetch("/api/creem/checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ plan }),
