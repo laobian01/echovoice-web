@@ -75,6 +75,16 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
     setLoginMsg(isEn ? "Magic link sent. Check your email." : "登录链接已发送，请查收邮箱");
   };
 
+  const logout = async () => {
+    const client = getSupabaseClient();
+    if (client) {
+      await client.auth.signOut();
+    }
+    setSessionToken(null);
+    setUserEmail(null);
+    setTrialRemaining(null);
+  };
+
   const play = async (freeMode = false) => {
     setError(null);
     setLoading(true);
@@ -192,10 +202,18 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
           {isEn ? "Free Preview" : "免费试听"}
         </button>
         {audioUrl ? <audio controls src={audioUrl} className="h-9" /> : null}
-        <span className={`rounded-full border px-3 py-1 text-xs ${sessionToken ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}`}>
+        <span className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${sessionToken ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}`}>
           {sessionToken ? (isEn ? "Logged in" : "已登录") : (isEn ? "Not logged in" : "未登录")}
           {sessionToken && userEmail ? ` · ${userEmail}` : ""}
           {sessionToken ? ` · ${isEn ? "Trials left" : "剩余试用"}: ${trialRemaining ?? "?"}` : ""}
+          {sessionToken && (
+            <>
+              <span className="mx-1">|</span>
+              <button onClick={logout} className="font-semibold underline hover:text-emerald-900 transition">
+                {isEn ? "Log out" : "退出"}
+              </button>
+            </>
+          )}
         </span>
       </div>
 
