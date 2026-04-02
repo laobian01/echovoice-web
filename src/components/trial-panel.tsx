@@ -16,11 +16,10 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const [roleId, setRoleId] = useState(roles[0].id);
   const [toneId, setToneId] = useState(tones[0].id);
   const [emotionId, setEmotionId] = useState(emotions[0].id);
-  const [text, setText] = useState(
-    isEn
-      ? "Welcome to EchoVoice. This is a sample script for web voice preview."
-      : "欢迎使用灵动之声，这是一段网页端试听示例。"
-  );
+  const EN_DEFAULT = "Welcome to EchoVoice. This is a sample script for web voice preview.";
+  const ZH_DEFAULT = "欢迎使用灵动之声，这是一段网页端试听示例。";
+  const [text, setText] = useState(isEn ? EN_DEFAULT : ZH_DEFAULT);
+  const isDefaultText = text.trim() === EN_DEFAULT || text.trim() === ZH_DEFAULT;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -76,7 +75,7 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
     setLoginMsg(isEn ? "Magic link sent. Check your email." : "登录链接已发送，请查收邮箱");
   };
 
-  const play = async () => {
+  const play = async (freeMode = false) => {
     setError(null);
     setLoading(true);
     setAudioUrl((prev) => {
@@ -91,17 +90,19 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
         return;
       }
 
-      const trialRes = await fetch("/api/trial/consume", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${sessionToken}` },
-      });
-      if (!trialRes.ok) {
-        const j = await trialRes.json().catch(() => null);
-        throw new Error(j?.error || (isEn ? "Trial check failed" : "试用校验失败"));
-      }
-      const trialJson = await trialRes.json().catch(() => null);
-      if (typeof trialJson?.remaining === "number") {
-        setTrialRemaining(trialJson.remaining);
+      if (!freeMode) {
+        const trialRes = await fetch("/api/trial/consume", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${sessionToken}` },
+        });
+        if (!trialRes.ok) {
+          const j = await trialRes.json().catch(() => null);
+          throw new Error(j?.error || (isEn ? "Trial check failed" : "试用校验失败"));
+        }
+        const trialJson = await trialRes.json().catch(() => null);
+        if (typeof trialJson?.remaining === "number") {
+          setTrialRemaining(trialJson.remaining);
+        }
       }
 
       const res = await fetch("/api/tts", {
@@ -176,11 +177,19 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <button
-          onClick={play}
+          onClick={() => play(false)}
           disabled={loading || !text.trim()}
-          className="rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 px-5 py-2.5 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 px-5 py-2.5 font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? (isEn ? "Generating..." : "生成中...") : (isEn ? "Generate & Play" : "生成并播放")}
+          {loading && !isDefaultText ? (isEn ? "Generating..." : "生成中...") : (isEn ? "Generate & Play" : "带字生成并播放")}
+        </button>
+        <button
+          onClick={() => play(true)}
+          disabled={loading || !isDefaultText}
+          title={!isDefaultText ? (isEn ? "Modify text requires consuming credits" : "修改文字后需点击左侧按钮消耗额度进行生成") : ""}
+          className="rounded-xl border border-white/60 bg-white/40 backdrop-blur-md px-5 py-2.5 font-semibold text-slate-700 shadow-sm transition hover:bg-white/60 hover:shadow disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isEn ? "Free Preview" : "免费试听"}
         </button>
         {audioUrl ? <audio controls src={audioUrl} className="h-9" /> : null}
         <span className={`rounded-full border px-3 py-1 text-xs ${sessionToken ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}`}>

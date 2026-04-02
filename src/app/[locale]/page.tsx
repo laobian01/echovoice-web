@@ -35,8 +35,8 @@ export default async function LocaleHome({ params }: Props) {
       <SiteHeader locale={l} />
 
       <main className="mx-auto max-w-6xl px-4 pb-16">
-        <section className="surface rounded-3xl p-6">
-          <h1 className="text-3xl font-black text-slate-900 md:text-4xl">
+        <section className="py-8 pt-4">
+          <h1 className="bg-gradient-to-br from-indigo-950 to-slate-700 bg-clip-text text-4xl font-black text-transparent md:text-5xl tracking-tight">
             {isEn ? "AI Voice Studio for Creators" : "面向创作者的 AI 配音工作台"}
           </h1>
           <p className="mt-3 max-w-3xl text-slate-600">
@@ -53,21 +53,21 @@ export default async function LocaleHome({ params }: Props) {
             >
               {isEn ? "Download Mac App" : "下载 Mac 版"}
             </a>
-            <Link className="rounded-xl border border-white/60 bg-white/40 backdrop-blur-md px-5 py-2.5 font-semibold text-slate-700 transition hover:bg-white/60 hover:shadow-sm" href={`/${l}/try`}>
+            <Link className="rounded-xl border border-white/60 bg-white/40 backdrop-blur-md px-6 py-2.5 font-semibold text-slate-700 shadow-sm transition hover:bg-white/60 hover:shadow" href={`/${l}/try`}>
               {isEn ? "Try on Web" : "在线试用"}
             </Link>
           </div>
         </section>
 
-        <section className="mt-5 grid gap-3 md:grid-cols-3">
+        <section className="mt-10 mb-12 grid gap-8 md:grid-cols-3">
           {[
             [isEn ? "Role Presets" : "角色与风格", isEn ? "Male, female, youthful, warm, senior and more." : "支持男声、女声、萝莉、暖男、知性女性、老年与童声等角色。"],
             [isEn ? "Tone & Emotion" : "语调与情绪", isEn ? "Natural, soft, deep, bright and broadcast tones with emotion controls." : "自然/柔和/低沉/明亮/播音，结合平静/开心/悲伤等情绪。"],
             [isEn ? "Fast Preview" : "在线生成试听", isEn ? "Type your script and preview instantly before full production." : "输入文案即可一键生成并播放，验证效果后再进入深度制作。"],
           ].map(([title, desc]) => (
-            <article key={String(title)} className="surface rounded-2xl p-5">
-              <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-              <p className="mt-2 text-sm text-slate-600">{desc}</p>
+            <article key={String(title)} className="border-l-2 border-indigo-200/40 pl-5">
+              <h2 className="text-lg font-bold text-slate-900/80">{title}</h2>
+              <p className="mt-2 text-sm text-slate-600/90 leading-relaxed">{desc}</p>
             </article>
           ))}
         </section>

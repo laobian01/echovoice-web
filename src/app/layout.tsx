@@ -38,7 +38,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body>
+        <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+          <div className="absolute -top-[20%] -left-[10%] w-[60vw] h-[60vw] rounded-full bg-[#efaac6]/60 blur-[120px]" style={{ animation: "float 18s ease-in-out infinite alternate" }} />
+          <div className="absolute -bottom-[20%] -right-[10%] w-[70vw] h-[70vw] rounded-full bg-[#94bbe9]/60 blur-[120px]" style={{ animation: "float-reverse 22s ease-in-out infinite alternate" }} />
+        </div>
+        {children}
+      </body>
     </html>
   );
 }
