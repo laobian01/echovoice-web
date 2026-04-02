@@ -144,21 +144,21 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
       <div className="grid gap-3 md:grid-cols-3">
         <label className="space-y-1">
           <span className="text-sm text-slate-600">{isEn ? "Role" : "角色"}</span>
-          <select className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-900" value={roleId} onChange={(e) => setRoleId(e.target.value)}>
+          <select className="w-full rounded-xl border border-white/60 bg-white/50 backdrop-blur-sm px-3 py-2 text-slate-900 shadow-sm transition hover:bg-white/70 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" value={roleId} onChange={(e) => setRoleId(e.target.value)}>
             {roles.map((r) => <option key={r.id} value={r.id}>{roleLabel(locale, r.id)}</option>)}
           </select>
         </label>
 
         <label className="space-y-1">
           <span className="text-sm text-slate-600">{isEn ? "Tone" : "语调"}</span>
-          <select className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-900" value={toneId} onChange={(e) => setToneId(e.target.value)}>
+          <select className="w-full rounded-xl border border-white/60 bg-white/50 backdrop-blur-sm px-3 py-2 text-slate-900 shadow-sm transition hover:bg-white/70 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" value={toneId} onChange={(e) => setToneId(e.target.value)}>
             {tones.map((r) => <option key={r.id} value={r.id}>{toneLabel(locale, r.id)}</option>)}
           </select>
         </label>
 
         <label className="space-y-1">
           <span className="text-sm text-slate-600">{isEn ? "Emotion" : "情绪"}</span>
-          <select className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-900" value={emotionId} onChange={(e) => setEmotionId(e.target.value)}>
+          <select className="w-full rounded-xl border border-white/60 bg-white/50 backdrop-blur-sm px-3 py-2 text-slate-900 shadow-sm transition hover:bg-white/70 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" value={emotionId} onChange={(e) => setEmotionId(e.target.value)}>
             {emotions.map((r) => <option key={r.id} value={r.id}>{emotionLabel(locale, r.id)}</option>)}
           </select>
         </label>
@@ -167,7 +167,7 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
       <div className="mt-3 space-y-1">
         <span className="text-sm text-slate-600">{isEn ? "Script" : "文案"}</span>
         <textarea
-          className="h-28 w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400"
+          className="h-28 w-full resize-none rounded-xl border border-white/60 bg-white/50 backdrop-blur-sm px-3 py-2 text-slate-900 shadow-sm transition hover:bg-white/70 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 placeholder:text-slate-500"
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={isEn ? "Type your script to preview" : "输入文案后试听"}

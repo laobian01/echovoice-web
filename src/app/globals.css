@@ -17,10 +17,15 @@ html, body {
 body {
   font-family: var(--font-sans);
   color: #0f172a;
-  background:
-    radial-gradient(65rem 35rem at 10% -10%, rgba(109, 126, 255, 0.14), transparent 60%),
-    radial-gradient(70rem 40rem at 90% 115%, rgba(77, 148, 255, 0.12), transparent 65%),
-    linear-gradient(180deg, #f6f8ff 0%, #eef3ff 100%);
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(238, 174, 202, 0.8), transparent 40%),
+    radial-gradient(circle at 90% 40%, rgba(148, 187, 233, 0.8), transparent 50%),
+    radial-gradient(circle at 30% 80%, rgba(186, 230, 253, 0.9), transparent 45%),
+    linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh;
 }
 
 .page-wrap {
@@ -28,9 +33,16 @@ body {
 }
 
 .surface {
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  box-shadow: 0 16px 40px rgba(43, 71, 148, 0.08);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-top-color: rgba(255, 255, 255, 0.8);
+  border-left-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 12px 32px 0 rgba(31, 38, 135, 0.04),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.1);
 }
 
 a {

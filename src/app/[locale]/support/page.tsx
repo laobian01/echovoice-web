@@ -33,7 +33,7 @@ export default async function SupportPage({ params }: Props) {
           <h1 className="text-3xl font-bold text-slate-900">{isEn ? "Support" : "技术支持"}</h1>
           <p className="mt-3 text-slate-700">
             {isEn ? "Support email:" : "客服邮箱："}
-            <a className="underline" href="mailto:13770669417jj@gmail.com">13770669417jj@gmail.com</a>
+            <a className="underline" href="mailto:support@echovoiceai.net">support@echovoiceai.net</a>
           </p>
           <p className="mt-1 text-sm text-slate-500">{isEn ? "Usually replied in 1-3 business days." : "通常 1-3 个工作日回复。"}</p>
 

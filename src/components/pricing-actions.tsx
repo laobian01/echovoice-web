@@ -38,7 +38,7 @@ export function PricingActions({ locale = "zh" }: { locale?: Locale }) {
         <button
           onClick={() => click("monthly")}
           disabled={loading !== null}
-          className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm hover:border-indigo-300 hover:shadow disabled:opacity-50"
+          className="surface rounded-2xl p-5 text-left transition hover:shadow-lg hover:-translate-y-1 hover:border-white/80 disabled:opacity-50"
         >
           <div className="text-lg font-semibold text-slate-900">{isEn ? "Pro Monthly" : "Pro 月订阅"}</div>
           <p className="mt-1 text-sm text-slate-600">{isEn ? "200 credits per month, renewable." : "每月 200 次额度，可持续更新。"}</p>
@@ -48,7 +48,7 @@ export function PricingActions({ locale = "zh" }: { locale?: Locale }) {
         <button
           onClick={() => click("pack100")}
           disabled={loading !== null}
-          className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm hover:border-indigo-300 hover:shadow disabled:opacity-50"
+          className="surface rounded-2xl p-5 text-left transition hover:shadow-lg hover:-translate-y-1 hover:border-white/80 disabled:opacity-50"
         >
           <div className="text-lg font-semibold text-slate-900">{isEn ? "Pack 100" : "加量包 100 次"}</div>
           <p className="mt-1 text-sm text-slate-600">{isEn ? "One-time purchase for extra credits." : "一次性购买，按需补充额度。"}</p>

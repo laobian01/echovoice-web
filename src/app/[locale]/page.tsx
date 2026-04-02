@@ -53,7 +53,7 @@ export default async function LocaleHome({ params }: Props) {
             >
               {isEn ? "Download Mac App" : "下载 Mac 版"}
             </a>
-            <Link className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 font-semibold text-slate-700" href={`/${l}/try`}>
+            <Link className="rounded-xl border border-white/60 bg-white/40 backdrop-blur-md px-5 py-2.5 font-semibold text-slate-700 transition hover:bg-white/60 hover:shadow-sm" href={`/${l}/try`}>
               {isEn ? "Try on Web" : "在线试用"}
             </Link>
           </div>
@@ -81,7 +81,7 @@ export default async function LocaleHome({ params }: Props) {
             <Link href={`/${l}/privacy`}>{isEn ? "Privacy Policy" : "隐私政策"}</Link>
             <Link href={`/${l}/terms`}>{isEn ? "Terms / EULA" : "服务条款 / EULA"}</Link>
             <Link href={`/${l}/support`}>{isEn ? "Support" : "技术支持"}</Link>
-            <a href="mailto:13770669417jj@gmail.com">13770669417jj@gmail.com</a>
+            <a href="mailto:support@echovoiceai.net">support@echovoiceai.net</a>
           </div>
         </footer>
       </main>
