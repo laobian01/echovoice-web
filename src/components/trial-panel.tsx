@@ -27,6 +27,20 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   useEffect(() => {
     const client = getSupabaseClient();
     if (!client) return;
+
+    // Handle magic link code exchange (PKCE)
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get("code");
+    if (code) {
+      client.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (!error) {
+          // Remove code from URL after exchange
+          url.searchParams.delete("code");
+          window.history.replaceState({}, document.title, url.pathname + url.search);
+        }
+      });
+    }
+
     client.auth.getSession().then(({ data }) => {
       setSessionToken(data.session?.access_token || null);
       setUserEmail(data.session?.user?.email || null);
