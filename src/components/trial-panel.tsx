@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { emotions, roles, tones } from "@/lib/presets";
 import { emotionLabel, Locale, roleLabel, toneLabel } from "@/lib/i18n";
 import { getSupabaseClient } from "@/lib/supabase";
+import { AuthModal } from "./auth-modal";
 
 export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const isEn = locale === "en";
@@ -11,9 +12,7 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [trialRemaining, setTrialRemaining] = useState<number | null>(null);
   const [isMember, setIsMember] = useState(false);
-  const [email, setEmail] = useState("");
   const [loginOpen, setLoginOpen] = useState(false);
-  const [loginMsg, setLoginMsg] = useState<string | null>(null);
   const [roleId, setRoleId] = useState(roles[0].id);
   const [toneId, setToneId] = useState(tones[0].id);
   const [emotionId, setEmotionId] = useState(emotions[0].id);
@@ -75,34 +74,11 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const emotion = useMemo(() => emotions.find((x) => x.id === emotionId) || emotions[0], [emotionId]);
 
   const requestLogin = () => {
-    setLoginMsg(null);
     if (!getSupabaseClient()) {
       setError(isEn ? "Trial login not configured" : "试用登录未配置");
       return;
     }
     setLoginOpen(true);
-  };
-
-  const sendMagicLink = async () => {
-    setLoginMsg(null);
-    if (!email.trim()) {
-      setLoginMsg(isEn ? "Please enter email" : "请输入邮箱");
-      return;
-    }
-    const client = getSupabaseClient();
-    if (!client) {
-      setLoginMsg(isEn ? "Supabase not configured" : "Supabase 未配置");
-      return;
-    }
-    const { error: err } = await client.auth.signInWithOtp({
-      email: email.trim(),
-      options: { emailRedirectTo: `${window.location.origin}/${locale}` },
-    });
-    if (err) {
-      setLoginMsg(err.message || (isEn ? "Login failed" : "登录失败"));
-      return;
-    }
-    setLoginMsg(isEn ? "Magic link sent. Check your email." : "登录链接已发送，请查收邮箱");
   };
 
   const logout = async () => {
@@ -250,29 +226,13 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
 
       {error ? <p className="mt-3 text-sm text-rose-600">{isEn ? "Error: " : "错误："}{error}</p> : null}
 
-      {loginOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-slate-900">{isEn ? "Sign in to get 5 free trials" : "登录后可免费试用 5 次"}</h3>
-            <p className="mt-2 text-sm text-slate-600">{isEn ? "We will send a magic link to your email." : "我们会发送登录链接到你的邮箱。"}</p>
-            <input
-              className="mt-4 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900"
-              placeholder={isEn ? "Email" : "邮箱"}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {loginMsg ? <p className="mt-2 text-sm text-slate-600">{loginMsg}</p> : null}
-            <div className="mt-4 flex items-center justify-end gap-2">
-              <button className="rounded-lg px-4 py-2 text-sm text-slate-600" onClick={() => setLoginOpen(false)}>
-                {isEn ? "Close" : "关闭"}
-              </button>
-              <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white" onClick={sendMagicLink}>
-                {isEn ? "Send link" : "发送链接"}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {loginOpen && (
+        <AuthModal 
+          isOpen={loginOpen} 
+          onClose={() => setLoginOpen(false)} 
+          locale={locale} 
+        />
+      )}
     </section>
   );
 }
