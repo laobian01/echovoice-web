@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const plan = body?.plan as Plan;
+    const userId = body?.userId;
 
     const monthlyProductId = process.env.CREEM_PRODUCT_MONTHLY;
     const packProductId = process.env.CREEM_PRODUCT_PACK100;
@@ -33,6 +34,9 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         product_id: productId,
         success_url: `${origin}/`,
+        metadata: {
+          user_id: userId,
+        },
       }),
     });
 

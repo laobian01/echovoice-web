@@ -26,8 +26,36 @@ export async function POST(req: NextRequest) {
   }
 
   const userId = userData.user.id;
+  
+  const body = await req.json().catch(() => ({}));
+  const checkOnly = !!body.checkOnly;
 
-  // Get current count
+  // 1. Check for Paid Credits
+  const { data: paidRow, error: paidErr } = await supabase
+    .from("user_credits")
+    .select("balance")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (paidRow && paidRow.balance > 0) {
+    if (checkOnly) {
+      return NextResponse.json({ ok: true, isMember: true, remaining: paidRow.balance });
+    }
+    const nextBalance = paidRow.balance - 1;
+    const { error: upErr } = await supabase
+      .from("user_credits")
+      .update({ balance: nextBalance })
+      .eq("user_id", userId);
+
+    if (upErr) return NextResponse.json({ error: "更新会员余额失败" }, { status: 500 });
+    return NextResponse.json({ 
+      ok: true, 
+      isMember: true, 
+      remaining: nextBalance 
+    });
+  }
+
+  // 2. Fallback to Trial Credits
   const { data: row, error: selErr } = await supabase
     .from("trial_credits")
     .select("count")
@@ -39,8 +67,13 @@ export async function POST(req: NextRequest) {
   }
 
   const current = row?.count ?? 0;
+
+  if (checkOnly) {
+    return NextResponse.json({ ok: true, isMember: false, used: current, remaining: MAX_TRIALS - current });
+  }
+
   if (current >= MAX_TRIALS) {
-    return NextResponse.json({ error: "试用次数已用完" }, { status: 403, });
+    return NextResponse.json({ error: "试用次数已用完，请购买会员续期" }, { status: 403, });
   }
 
   const next = current + 1;
@@ -52,5 +85,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "更新试用次数失败" }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, used: next, remaining: MAX_TRIALS - next });
+  return NextResponse.json({ 
+    ok: true, 
+    isMember: false, 
+    used: next, 
+    remaining: MAX_TRIALS - next 
+  });
 }

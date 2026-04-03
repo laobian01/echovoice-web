@@ -10,6 +10,7 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [trialRemaining, setTrialRemaining] = useState<number | null>(null);
+  const [isMember, setIsMember] = useState(false);
   const [email, setEmail] = useState("");
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginMsg, setLoginMsg] = useState<string | null>(null);
@@ -53,6 +54,21 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
       sub.subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (sessionToken) {
+      fetch("/api/trial/consume", {
+        method: "POST", // Using POST as it currently handles both check and consume
+        headers: { Authorization: `Bearer ${sessionToken}` },
+        body: JSON.stringify({ checkOnly: true }) // We should ideally have a GET status, but let's make POST non-consuming if possible or just rely on first play
+      }).then(res => res.json()).then(data => {
+        if (typeof data.remaining === 'number') {
+          setTrialRemaining(data.remaining);
+          setIsMember(!!data.isMember);
+        }
+      }).catch(() => {});
+    }
+  }, [sessionToken]);
 
   const role = useMemo(() => roles.find((x) => x.id === roleId) || roles[0], [roleId]);
   const tone = useMemo(() => tones.find((x) => x.id === toneId) || tones[0], [toneId]);
@@ -126,6 +142,7 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
         const trialJson = await trialRes.json().catch(() => null);
         if (typeof trialJson?.remaining === "number") {
           setTrialRemaining(trialJson.remaining);
+          setIsMember(!!trialJson.isMember);
         }
       }
 
@@ -216,14 +233,14 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
           {isEn ? "Free Preview" : "免费试听"}
         </button>
         {audioUrl ? <audio controls src={audioUrl} className="h-9" /> : null}
-        <span className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${sessionToken ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}`}>
-          {sessionToken ? (isEn ? "Logged in" : "已登录") : (isEn ? "Not logged in" : "未登录")}
+        <span className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${sessionToken ? (isMember ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700") : "border-slate-200 bg-slate-50 text-slate-600"}`}>
+          {sessionToken ? (isMember ? (isEn ? "Pro Member" : "专业版会员") : (isEn ? "Logged in" : "已登录")) : (isEn ? "Not logged in" : "未登录")}
           {sessionToken && userEmail ? ` · ${userEmail}` : ""}
-          {sessionToken ? ` · ${isEn ? "Trials left" : "剩余试用"}: ${trialRemaining ?? "?"}` : ""}
+          {sessionToken ? ` · ${isMember ? (isEn ? "Credits" : "剩余额度") : (isEn ? "Trials left" : "剩余试用")}: ${trialRemaining ?? "?"}` : ""}
           {sessionToken && (
             <>
               <span className="mx-1">|</span>
-              <button onClick={logout} className="font-semibold underline hover:text-emerald-900 transition">
+              <button onClick={logout} className="font-semibold underline hover:opacity-70 transition">
                 {isEn ? "Log out" : "退出"}
               </button>
             </>

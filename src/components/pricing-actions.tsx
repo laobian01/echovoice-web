@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { Locale } from "@/lib/i18n";
+import { getSupabaseClient } from "@/lib/supabase";
 
-async function goCheckout(plan: "monthly" | "pack100") {
+async function goCheckout(plan: "monthly" | "pack100", userId?: string) {
   const res = await fetch("/api/creem/checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ plan }),
+    body: JSON.stringify({ plan, userId }),
   });
 
   const data = await res.json();
@@ -23,9 +24,17 @@ export function PricingActions({ locale = "zh" }: { locale?: Locale }) {
 
   const click = async (plan: "monthly" | "pack100") => {
     setError(null);
+    const client = getSupabaseClient();
+    const { data: { session } } = await (client?.auth.getSession() || { data: { session: null } });
+
+    if (!session?.user?.id) {
+      setError(isEn ? "Please log in before purchasing." : "请先登录后再进行购买。");
+      return;
+    }
+
     setLoading(plan);
     try {
-      await goCheckout(plan);
+      await goCheckout(plan, session.user.id);
     } catch (e) {
       setLoading(null);
       setError(e instanceof Error ? e.message : isEn ? "Payment failed" : "支付失败");
