@@ -36,7 +36,6 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         product_id: productId,
         success_url: `${origin}/`,
-        requestId: userId, // Redundant custom field
         metadata: {
           user_id: userId,
           userId: userId, // Redundant case
