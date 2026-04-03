@@ -61,7 +61,14 @@ export async function POST(req: NextRequest) {
       }
 
       // 4. Determine Credits
-      const productId = object?.product_id || object?.productId;
+      // Based on real payload, productId is at object.product.id or object.product
+      const productId = object?.product?.id || 
+                        object?.product || 
+                        object?.order?.product || 
+                        object?.product_id || 
+                        object?.productId;
+      
+      console.log(`[Creem Webhook] Final Resolved ProductId: ${productId}`);
       let creditsToAdd = 0;
       if (productId === process.env.CREEM_PRODUCT_MONTHLY) {
         creditsToAdd = MONTHLY_CREDITS;
