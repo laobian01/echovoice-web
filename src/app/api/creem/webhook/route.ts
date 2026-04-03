@@ -14,18 +14,22 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const event = body?.event; // Creem event type
-    const data = body?.data;   // Creem payment data
+    
+    // Correct Creem structure: { eventType: "...", object: { ... } }
+    const eventType = body?.eventType || body?.event; 
+    const object = body?.object || body?.data; 
 
-    console.log("[Creem Webhook] Event received:", event);
+    console.log("[Creem Webhook] EventType received:", eventType);
 
-    if (event === "payment.succeeded") {
-      const userId = data?.metadata?.user_id;
-      const productId = data?.product_id;
+    if (eventType === "checkout.completed" || eventType === "payment.succeeded") {
+      const userId = object?.metadata?.user_id;
+      const productId = object?.product_id || object?.productId;
+
+      console.log("[Creem Webhook] UserId:", userId, "ProductId:", productId);
 
       if (!userId) {
         console.error("[Creem Webhook] No user_id in metadata");
-        return NextResponse.json({ error: "No user_id in metadata" }, { status: 400 });
+        return NextResponse.json({ error: "No user_id in metadata" }, { status: 200 }); // Return 200 to avoid retries
       }
 
       // Determine how many credits to add
@@ -50,23 +54,29 @@ export async function POST(req: NextRequest) {
         .eq("user_id", userId)
         .maybeSingle();
 
-      if (getErr) throw getErr;
+      if (getErr) {
+         console.error("[Creem Webhook] Get balance error:", getErr);
+         throw getErr;
+      }
 
       const newBalance = (current?.balance ?? 0) + creditsToAdd;
 
       // Update balance
       const { error: upErr } = await supabase
         .from("user_credits")
-        .upsert({ user_id: userId, balance: newBalance, updated_at: new Array().toString() }, { onConflict: "user_id" });
+        .upsert({ user_id: userId, balance: newBalance }, { onConflict: "user_id" });
 
-      if (upErr) throw upErr;
+      if (upErr) {
+        console.error("[Creem Webhook] Upsert balance error:", upErr);
+        throw upErr;
+      }
 
-      console.log(`[Creem Webhook] Credited ${creditsToAdd} to user ${userId}. New balance: ${newBalance}`);
+      console.log(`[Creem Webhook] SUCCESSFULLY Credited ${creditsToAdd} to user ${userId}. New balance: ${newBalance}`);
     }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("[Creem Webhook] Error:", error);
+    console.error("[Creem Webhook] GLOBAL ERROR:", error);
     return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
   }
 }
