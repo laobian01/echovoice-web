@@ -24,8 +24,10 @@ export async function POST(req: NextRequest) {
     }
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
+    const isTestKey = creemApiKey.includes("_test_");
+    const baseUrl = isTestKey ? "https://test-api.creem.io/v1" : "https://api.creem.io/v1";
 
-    const res = await fetch("https://api.creem.io/v1/checkouts", {
+    const res = await fetch(`${baseUrl}/checkouts`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
