@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { getSupabaseClient } from "@/lib/supabase";
 import { Locale } from "@/lib/i18n";
 
@@ -18,8 +19,11 @@ export function AuthModal({ isOpen, onClose, locale = "zh", initialMode = "login
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,9 +71,9 @@ export function AuthModal({ isOpen, onClose, locale = "zh", initialMode = "login
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-md overflow-hidden rounded-3xl border border-white/40 bg-white/80 p-8 shadow-2xl backdrop-blur-2xl">
+  const modal = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/40 px-4 py-8 backdrop-blur-sm">
+      <div className="w-full max-w-md overflow-hidden rounded-3xl border border-white/40 bg-white p-8 shadow-2xl">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-slate-900">
             {mode === "login" && (isEn ? "Sign In" : "会员登录")}
@@ -138,26 +142,26 @@ export function AuthModal({ isOpen, onClose, locale = "zh", initialMode = "login
           </button>
         </form>
 
-        <div className="mt-8 space-y-4 border-t border-slate-100 pt-6">
-          <div className="flex flex-col gap-3">
-            {mode !== "login" && (
-              <button onClick={() => { setMode("login"); setMessage(null); }} className="text-sm text-slate-600 hover:text-indigo-600">
-                {isEn ? "Already have an account? Sign In" : "已有账号？立即登录"}
-              </button>
-            )}
-            {mode !== "register" && (
-              <button onClick={() => { setMode("register"); setMessage(null); }} className="text-sm text-slate-600 hover:text-indigo-600">
-                {isEn ? "New here? Create an account" : "没有账号？立即注册"}
-              </button>
-            )}
-            {mode !== "magic" && (
-              <button onClick={() => { setMode("magic"); setMessage(null); }} className="text-sm text-slate-600 hover:text-indigo-600">
-                {isEn ? "Login with Magic Link instead" : "或者使用免密链接登录"}
-              </button>
-            )}
-          </div>
+        <div className="mt-6 space-y-3 border-t border-slate-100 pt-5">
+          {mode !== "login" && (
+            <button onClick={() => { setMode("login"); setMessage(null); }} className="block w-full text-center text-sm text-slate-600 hover:text-indigo-600">
+              {isEn ? "Already have an account? Sign In" : "已有账号？立即登录"}
+            </button>
+          )}
+          {mode !== "register" && (
+            <button onClick={() => { setMode("register"); setMessage(null); }} className="block w-full text-center text-sm text-slate-600 hover:text-indigo-600">
+              {isEn ? "New here? Create an account" : "没有账号？立即注册"}
+            </button>
+          )}
+          {mode !== "magic" && (
+            <button onClick={() => { setMode("magic"); setMessage(null); }} className="block w-full text-center text-sm text-slate-600 hover:text-indigo-600">
+              {isEn ? "Login with Magic Link instead" : "或者使用免密链接登录"}
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }
