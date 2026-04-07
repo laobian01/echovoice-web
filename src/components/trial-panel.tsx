@@ -29,9 +29,11 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
     if (!client) return;
 
     // Handle magic link code exchange (PKCE)
+    // Skip on reset-password page — that page handles its own code exchange
     const url = new URL(window.location.href);
     const code = url.searchParams.get("code");
-    if (code) {
+    const isResetPage = url.pathname.includes("reset-password");
+    if (code && !isResetPage) {
       client.auth.exchangeCodeForSession(code).then(({ error }) => {
         if (!error) {
           // Remove code from URL after exchange

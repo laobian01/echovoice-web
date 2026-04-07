@@ -14,25 +14,54 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);      // recovery session established
+  const [exchanging, setExchanging] = useState(true); // waiting for code exchange
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
-    // Supabase will automatically handle the token exchange from the reset link
     const client = getSupabaseClient();
-    if (!client) return;
+    if (!client) { setExchanging(false); return; }
 
-    // Listen for PASSWORD_RECOVERY event
+    // 1. Exchange the ?code= parameter from the reset email link
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get("code");
+
+    const init = async () => {
+      if (code) {
+        const { error } = await client.auth.exchangeCodeForSession(code);
+        if (error) {
+          console.error("[ResetPassword] Code exchange failed:", error.message);
+          setMessage({ type: "error", text: isEn ? "Invalid or expired reset link. Please request a new one." : "重置链接无效或已过期，请重新申请。" });
+          setExchanging(false);
+          return;
+        }
+        // Clean up URL
+        url.searchParams.delete("code");
+        window.history.replaceState({}, document.title, url.pathname);
+      }
+
+      // 2. Check if we have a valid session now
+      const { data: { session } } = await client.auth.getSession();
+      if (session) {
+        setReady(true);
+      } else {
+        setMessage({ type: "error", text: isEn ? "No active session. Please click the reset link from your email again." : "无有效会话，请重新点击邮件中的重置链接。" });
+      }
+      setExchanging(false);
+    };
+
+    init();
+
+    // Also listen for PASSWORD_RECOVERY event (hash-based flow)
     const { data: sub } = client.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
-        // User has been authenticated via the recovery link
-        console.log("[ResetPassword] Recovery session established");
+        setReady(true);
+        setExchanging(false);
       }
     });
 
-    return () => {
-      sub.subscription.unsubscribe();
-    };
-  }, []);
+    return () => { sub.subscription.unsubscribe(); };
+  }, [isEn]);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +90,7 @@ export default function ResetPasswordPage() {
       setMessage({ type: "success", text: isEn ? "Password updated successfully! You can now sign in with your new password." : "密码已更新成功！您现在可以使用新密码登录了。" });
       setPassword("");
       setConfirmPassword("");
+      setReady(false); // hide form after success
     } catch (err: any) {
       setMessage({ type: "error", text: err.message || (isEn ? "Failed to update password." : "密码更新失败。") });
     } finally {
@@ -87,51 +117,63 @@ export default function ResetPasswordPage() {
             </p>
           </div>
 
-          <form onSubmit={handleReset} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-slate-700">
-                {isEn ? "New Password" : "新密码"}
-              </label>
-              <input
-                type="password"
-                required
-                minLength={6}
-                className="w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+          {exchanging && (
+            <p className="text-center text-sm text-slate-500">{isEn ? "Verifying reset link..." : "正在验证重置链接..."}</p>
+          )}
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-slate-700">
-                {isEn ? "Confirm Password" : "确认密码"}
-              </label>
-              <input
-                type="password"
-                required
-                minLength={6}
-                className="w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-
-            {message && (
-              <div className={`rounded-xl px-4 py-3 text-sm ${message.type === "success" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
-                {message.text}
+          {ready && !exchanging && (
+            <form onSubmit={handleReset} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-slate-700">
+                  {isEn ? "New Password" : "新密码"}
+                </label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  className="w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 py-3 font-semibold text-white shadow-lg transition active:scale-95 disabled:opacity-50"
-            >
-              {loading ? (isEn ? "Updating..." : "正在更新...") : (isEn ? "Update Password" : "更新密码")}
-            </button>
-          </form>
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-slate-700">
+                  {isEn ? "Confirm Password" : "确认密码"}
+                </label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  className="w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 py-3 font-semibold text-white shadow-lg transition active:scale-95 disabled:opacity-50"
+              >
+                {loading ? (isEn ? "Updating..." : "正在更新...") : (isEn ? "Update Password" : "更新密码")}
+              </button>
+            </form>
+          )}
+
+          {message && (
+            <div className={`mt-4 rounded-xl px-4 py-3 text-sm ${message.type === "success" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
+              {message.text}
+            </div>
+          )}
+
+          {message?.type === "success" && (
+            <a href={`/${locale}`} className="mt-4 block w-full rounded-xl border border-slate-200 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
+              {isEn ? "Back to Home" : "返回首页"}
+            </a>
+          )}
         </div>
       </main>
     </div>
