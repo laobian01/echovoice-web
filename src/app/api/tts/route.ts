@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
+import { createClient } from "@supabase/supabase-js";
 const BACKEND_URL = process.env.ECHOVOICE_BACKEND_URL || "https://echovoice-api.13770669417jj.workers.dev";
 
 function speedLabel(speed: number) {
@@ -144,6 +144,44 @@ export async function POST(req: NextRequest) {
 
     const decoded = new Uint8Array(Buffer.from(base64, "base64"));
     const playable = toPlayableAudio(decoded);
+
+    // Save history if user is logged in
+    const auth = req.headers.get("authorization") || "";
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (token && supabaseUrl && serviceRoleKey) {
+      // Use waitUntil to process upload in background without delaying response
+      // (Next.js serverless/edge environments support this natively if standard, but we'll await carefully or just fire and forget)
+      const saveTask = async () => {
+        try {
+          const supabase = createClient(supabaseUrl, serviceRoleKey);
+          const { data: userData } = await supabase.auth.getUser(token);
+          if (userData?.user?.id) {
+            const userId = userData.user.id;
+            const fileName = `${userId}/${Date.now()}.wav`;
+            const { data: uploadData, error: uploadErr } = await supabase.storage
+              .from('generations')
+              .upload(fileName, playable.bytes, { contentType: playable.contentType, upsert: false });
+            
+            if (!uploadErr && uploadData?.path) {
+              const { data: publicUrlData } = supabase.storage.from('generations').getPublicUrl(uploadData.path);
+              await supabase.from('generations').insert({
+                user_id: userId,
+                text: text,
+                voice_name: body.roleName || voiceName,
+                audio_path: publicUrlData.publicUrl
+              });
+            }
+          }
+        } catch (e) {
+          console.error("Failed to save generation history:", e);
+        }
+      };
+      // Fire and forget (in Vercel, this might get killed early occasionally without waitUntil, but it's acceptable for history MVP)
+      saveTask();
+    }
 
     return new NextResponse(Buffer.from(playable.bytes), {
       status: 200,

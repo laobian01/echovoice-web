@@ -5,7 +5,7 @@ import { emotions, roles, tones } from "@/lib/presets";
 import { emotionLabel, Locale, roleLabel, toneLabel } from "@/lib/i18n";
 import { getSupabaseClient } from "@/lib/supabase";
 import { AuthModal } from "./auth-modal";
-
+import { GenerationsList } from "./generations-list";
 export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const isEn = locale === "en";
   const [sessionToken, setSessionToken] = useState<string | null>(null);
@@ -23,6 +23,7 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [refreshHistory, setRefreshHistory] = useState(0);
 
   useEffect(() => {
     const client = getSupabaseClient();
@@ -126,10 +127,14 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
 
       const res = await fetch("/api/tts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(sessionToken ? { "Authorization": `Bearer ${sessionToken}` } : {})
+        },
         body: JSON.stringify({
           text,
           voiceName: role.voiceName,
+          roleName: role.name,
           speed: tone.speed,
           pitch: tone.pitch,
           emotion: emotionLabel(locale, emotion.id),
@@ -147,6 +152,11 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
       setAudioUrl(url);
       const audio = new Audio(url);
       await audio.play();
+      
+      // Trigger history list refresh if logged in
+      if (sessionToken && !freeMode) {
+        setRefreshHistory(v => v + 1);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : isEn ? "Generation failed" : "生成失败");
     } finally {
@@ -234,6 +244,10 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
           onClose={() => setLoginOpen(false)} 
           locale={locale} 
         />
+      )}
+
+      {sessionToken && (
+        <GenerationsList locale={locale} refreshTrigger={refreshHistory} />
       )}
     </section>
   );
