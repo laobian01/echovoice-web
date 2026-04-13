@@ -57,6 +57,9 @@ export function SiteHeader({ locale = "zh" }: { locale?: Locale }) {
             <Link className="rounded-full border border-white/60 bg-white/20 px-3 py-1.5 text-slate-700 transition hover:bg-white/60 hover:shadow-sm" href={`${p}/pricing`}>
               {isEn ? "Pricing" : "会员订阅"}
             </Link>
+            <Link className="rounded-full border border-white/60 bg-white/20 px-3 py-1.5 text-slate-700 transition hover:bg-white/60 hover:shadow-sm" href={`${p}/blog`}>
+              {isEn ? "Blog" : "博客"}
+            </Link>
             <Link className="rounded-full border border-white/60 bg-white/20 px-3 py-1.5 text-slate-700 transition hover:bg-white/60 hover:shadow-sm" href={`${p}/support`}>
               {isEn ? "Support" : "支持"}
             </Link>
