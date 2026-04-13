@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getAllSlugs } from "@/lib/blog";
+import { voicesData, solutionsData } from "@/lib/seo-data";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://echovoiceai.net";
   const now = new Date();
+  const locales = ["zh", "en"];
 
   const staticPaths = [
     { path: "", priority: 1.0 },
@@ -41,5 +43,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticEntries, ...blogEntries];
+  // SEO Voices entries
+  const voiceEntries = locales.flatMap((l) =>
+    voicesData.map((v) => ({
+      url: `${base}/${l}/voices/${v.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }))
+  );
+
+  // SEO Solutions entries
+  const solutionEntries = locales.flatMap((l) =>
+    solutionsData.map((s) => ({
+      url: `${base}/${l}/solutions/${s.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }))
+  );
+
+  return [...staticEntries, ...blogEntries, ...voiceEntries, ...solutionEntries];
 }

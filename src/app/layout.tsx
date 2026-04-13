@@ -125,6 +125,8 @@ const jsonLd = {
   ],
 };
 
+import { SeoFooter } from "@/components/seo-footer";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -156,6 +158,7 @@ export default function RootLayout({
           <div className="absolute -bottom-[20%] -right-[10%] w-[70vw] h-[70vw] rounded-full bg-[#94bbe9]/60 blur-[120px]" style={{ animation: "float-reverse 22s ease-in-out infinite alternate" }} />
         </div>
         {children}
+        <SeoFooter />
       </body>
     </html>
   );
