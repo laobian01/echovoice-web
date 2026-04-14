@@ -135,7 +135,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
-        <meta name="baidu-site-verification" content="codeva-M812mwl6Cc" />
+        <meta name="baidu-site-verification" content="codeva-InL9RdOkuj" />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-N1Z2GDF29D"
           strategy="afterInteractive"
