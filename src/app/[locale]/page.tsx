@@ -59,6 +59,10 @@ export default async function LocaleHome({ params }: Props) {
           </div>
         </section>
 
+        <section className="mt-6 mb-12 relative z-10 w-full animate-in fade-in slide-in-from-bottom-6 duration-1000">
+          <TrialPanel locale={l} />
+        </section>
+
         <section className="mt-10 mb-12 grid gap-8 md:grid-cols-3">
           {[
             [isEn ? "Professional Roles" : "专业级音色", isEn ? "Loli, warm male, broadcast and 10+ specific roles." : "提供萝莉音、暖男、播音腔、老教授等 10+ 垂直细分音色角色。"],
@@ -92,11 +96,7 @@ export default async function LocaleHome({ params }: Props) {
           </div>
         </section>
 
-        <section className="mt-5">
-          <TrialPanel locale={l} />
-        </section>
-
-        <footer className="mt-8 border-t border-slate-300 pt-4 text-sm text-slate-600">
+        <footer className="mt-8 border-t border-slate-300 pt-8 text-sm text-slate-600">
           <div className="flex flex-wrap gap-4">
             <Link href={`/${l}/privacy`}>{isEn ? "Privacy Policy" : "隐私政策"}</Link>
             <Link href={`/${l}/terms`}>{isEn ? "Terms / EULA" : "服务条款 / EULA"}</Link>

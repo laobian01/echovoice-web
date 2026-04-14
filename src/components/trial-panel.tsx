@@ -267,9 +267,19 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
         <button
           onClick={() => play(false)}
           disabled={loading || !text.trim()}
-          className="rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 px-5 py-2.5 font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
+          className="relative overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 via-blue-500 to-indigo-600 bg-[length:200%_auto] px-6 py-3 font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-indigo-500/30 disabled:cursor-not-allowed disabled:opacity-50 animate-[gradient_3s_linear_infinite]"
         >
-          {loading && !isDefaultText ? (isEn ? "Generating..." : "生成中...") : (isEn ? "Generate & Play" : "带字生成并播放")}
+          {loading && !isDefaultText ? (
+            <span className="flex items-center gap-2">
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+              {isEn ? "Generating..." : "生成中..."}
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <svg className="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              {isEn ? "Generate & Play" : "带字生成并播放"}
+            </span>
+          )}
         </button>
         <button
           onClick={() => play(true)}

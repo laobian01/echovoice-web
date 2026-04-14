@@ -44,7 +44,7 @@ export function SiteHeader({ locale = "zh" }: { locale?: Locale }) {
             <Image src="/logo.png" alt="EchoVoice Logo" fill className="rounded-xl shadow-sm object-cover" />
           </div>
           <div className="hidden sm:block">
-            <p className="text-sm font-semibold text-slate-900">灵动之声 EchoVoice</p>
+            <p className="text-sm font-semibold text-slate-900">{isEn ? "EchoVoice" : "灵动之声 EchoVoice"}</p>
             <p className="text-xs text-slate-500">{isEn ? "AI Voice Studio" : "AI 语音工作室"}</p>
           </div>
         </Link>
