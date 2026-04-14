@@ -6,13 +6,17 @@ import { emotionLabel, Locale, roleLabel, toneLabel } from "@/lib/i18n";
 import { getSupabaseClient } from "@/lib/supabase";
 import { AuthModal } from "./auth-modal";
 import { GenerationsList } from "./generations-list";
+import { OutOfCreditsModal } from "./out-of-credits-modal";
 export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const isEn = locale === "en";
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [trialRemaining, setTrialRemaining] = useState<number | null>(null);
   const [isMember, setIsMember] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [outOfCreditsOpen, setOutOfCreditsOpen] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [roleId, setRoleId] = useState(roles[0].id);
   const [toneId, setToneId] = useState(tones[0].id);
   const [emotionId, setEmotionId] = useState(emotions[0].id);
@@ -20,6 +24,8 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const ZH_DEFAULT = "欢迎使用灵动之声，这是一段网页端试听示例。";
   const [text, setText] = useState(isEn ? EN_DEFAULT : ZH_DEFAULT);
   const isDefaultText = text.trim() === EN_DEFAULT || text.trim() === ZH_DEFAULT;
+  const MAX_CHARS = 500;
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -44,13 +50,21 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
       });
     }
 
+    // Capture referral code if present
+    const refCode = url.searchParams.get("ref");
+    if (refCode) {
+      localStorage.setItem("echovoice_ref", refCode);
+    }
+
     client.auth.getSession().then(({ data }) => {
       setSessionToken(data.session?.access_token || null);
       setUserEmail(data.session?.user?.email || null);
+      setUserId(data.session?.user?.id || null);
     });
     const { data: sub } = client.auth.onAuthStateChange((_event, session) => {
       setSessionToken(session?.access_token || null);
       setUserEmail(session?.user?.email || null);
+      setUserId(session?.user?.id || null);
     });
     return () => {
       sub.subscription.unsubscribe();
@@ -59,16 +73,32 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
 
   useEffect(() => {
     if (sessionToken) {
+      // 1. Fetch credits info
       fetch("/api/trial/consume", {
-        method: "POST", // Using POST as it currently handles both check and consume
+        method: "POST",
         headers: { Authorization: `Bearer ${sessionToken}` },
-        body: JSON.stringify({ checkOnly: true }) // We should ideally have a GET status, but let's make POST non-consuming if possible or just rely on first play
+        body: JSON.stringify({ checkOnly: true })
       }).then(res => res.json()).then(data => {
         if (typeof data.remaining === 'number') {
           setTrialRemaining(data.remaining);
           setIsMember(!!data.isMember);
         }
       }).catch(() => {});
+
+      // 2. Process referral if any
+      const savedRef = localStorage.getItem("echovoice_ref");
+      if (savedRef) {
+        fetch("/api/referral/redeem", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json", 
+            "Authorization": `Bearer ${sessionToken}` 
+          },
+          body: JSON.stringify({ ref: savedRef })
+        }).then(() => {
+          localStorage.removeItem("echovoice_ref");
+        }).catch(() => {});
+      }
     }
   }, [sessionToken]);
 
@@ -116,7 +146,13 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
         });
         if (!trialRes.ok) {
           const j = await trialRes.json().catch(() => null);
-          throw new Error(j?.error || (isEn ? "Trial check failed" : "试用校验失败"));
+          const errMessage = j?.error || (isEn ? "Trial check failed" : "试用校验失败");
+          if (trialRes.status === 403 || errMessage.includes("已用完")) {
+            setOutOfCreditsOpen(true);
+            setLoading(false);
+            return;
+          }
+          throw new Error(errMessage);
         }
         const trialJson = await trialRes.json().catch(() => null);
         if (typeof trialJson?.remaining === "number") {
@@ -195,13 +231,36 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
       </div>
 
       <div className="mt-3 space-y-1">
-        <span className="text-sm text-slate-600">{isEn ? "Script" : "文案"}</span>
-        <textarea
-          className="h-28 w-full resize-none rounded-xl border border-white/60 bg-white/50 backdrop-blur-sm px-3 py-2 text-slate-900 shadow-sm transition hover:bg-white/70 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 placeholder:text-slate-500"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={isEn ? "Type your script to preview" : "输入文案后试听"}
-        />
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-slate-600">{isEn ? "Script" : "文案"}</span>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setText(text.replace(/,/g, "，").replace(/\./g, "。").replace(/\?/g, "？").replace(/!/g, "！"))}
+              className="text-xs text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded transition"
+              title={isEn ? "Format English punctuation to Chinese for better AI pauses" : "将英文标点转为中文全角标点，有助于获得更好的停顿效果"}
+            >
+              {isEn ? "Format Punctuation" : "修正标点"}
+            </button>
+            <button 
+              onClick={() => setText("")}
+              className="text-xs text-slate-500 hover:bg-slate-100 px-2 py-1 rounded transition"
+            >
+              {isEn ? "Clear" : "清空"}
+            </button>
+          </div>
+        </div>
+        <div className="relative">
+          <textarea
+            className={`h-32 w-full resize-none rounded-xl border bg-white/50 backdrop-blur-sm px-3 py-2 text-slate-900 shadow-sm transition hover:bg-white/70 focus:bg-white/80 focus:outline-none focus:ring-2 placeholder:text-slate-500 ${text.length > MAX_CHARS ? 'border-rose-500 focus:ring-rose-500/30' : 'border-white/60 focus:ring-indigo-500/30'}`}
+            value={text}
+            onChange={(e) => setText(e.target.value.substring(0, MAX_CHARS))}
+            placeholder={isEn ? "Type your script to preview" : "输入文案后试听"}
+            maxLength={MAX_CHARS}
+          />
+          <span className={`absolute bottom-2 right-2 text-xs font-mono ${text.length >= MAX_CHARS ? 'text-rose-500' : 'text-slate-400'}`}>
+            {text.length} / {MAX_CHARS}
+          </span>
+        </div>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -228,6 +287,11 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
           {sessionToken && (
             <>
               <span className="mx-1">|</span>
+              <button onClick={() => setShowInviteModal(true)} className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800 transition">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                {isEn ? "Invite & Get Credits" : "邀请送额度"}
+              </button>
+              <span className="mx-1">|</span>
               <button onClick={logout} className="font-semibold underline hover:opacity-70 transition">
                 {isEn ? "Log out" : "退出"}
               </button>
@@ -244,6 +308,44 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
           onClose={() => setLoginOpen(false)} 
           locale={locale} 
         />
+      )}
+
+      <OutOfCreditsModal 
+        isOpen={outOfCreditsOpen} 
+        onClose={() => setOutOfCreditsOpen(false)} 
+        locale={locale} 
+      />
+
+      {showInviteModal && userId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-xl p-6 w-full max-w-md relative animate-in zoom-in-95 duration-200">
+            <button onClick={() => setShowInviteModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">🎁 {isEn ? "Invite & Earn" : "邀请送额度"}</h3>
+            <p className="text-sm text-slate-600 mb-4">
+              {isEn 
+                ? "Share your custom link. When a friend signs up, they get +10 credits instantly, and you get +10 credits!" 
+                : "复制专属链接发送给好友。好友注册即可获得额外 10 次额度，你也将同时获得 10 次额度！无上限。"}
+            </p>
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
+              <input 
+                readOnly 
+                className="bg-transparent border-none outline-none w-full text-sm text-slate-700" 
+                value={`https://echovoiceai.net/${locale}?ref=${userId}`}
+              />
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(`https://echovoiceai.net/${locale}?ref=${userId}`);
+                  alert(isEn ? "Copied!" : "链接已复制！");
+                }}
+                className="shrink-0 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition"
+              >
+                {isEn ? "Copy" : "复制"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {sessionToken && (
