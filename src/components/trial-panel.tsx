@@ -124,9 +124,16 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
     setTrialRemaining(null);
   };
 
+  const trackEvent = (name: string, params?: object) => {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", name, params);
+    }
+  };
+
   const play = async (freeMode = false) => {
     setError(null);
     setLoading(true);
+    trackEvent("click_generate", { mode: freeMode ? "free" : "credits", locale });
     setAudioUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -192,6 +199,7 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
       // Trigger history list refresh if logged in
       if (sessionToken && !freeMode) {
         setRefreshHistory(v => v + 1);
+        trackEvent("audio_generated", { user: userEmail, role: role.name });
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : isEn ? "Generation failed" : "生成失败");

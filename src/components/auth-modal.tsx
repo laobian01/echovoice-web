@@ -43,13 +43,25 @@ export function AuthModal({ isOpen, onClose, locale = "zh", initialMode = "login
         if (error) throw error;
         onClose();
       } else if (mode === "register") {
-        const { error } = await supabase.auth.signUp({ 
+        const { data, error } = await supabase.auth.signUp({ 
           email, 
           password,
           options: { emailRedirectTo: `${window.location.origin}/${locale}` }
         });
         if (error) throw error;
-        setMessage({ type: "success", text: isEn ? "Registration successful! Check your email for verification." : "注册成功！请查看邮件以验证您的账号。" });
+        
+        // If "Confirm Email" is OFF in Supabase, data.session will be present immediately
+        if (data.session) {
+          onClose(); // Automatically log in and close
+          return;
+        }
+
+        setMessage({ 
+          type: "success", 
+          text: isEn 
+            ? "Registration successful! Check your email for verification (if you don't receive it, check your spam folder)." 
+            : "注册成功！若开启了验证请查收邮件（如未收到请检查垃圾箱）。" 
+        });
       } else if (mode === "forgot") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/${locale}/reset-password`,

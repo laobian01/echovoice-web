@@ -1,0 +1,25 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/baidu_verify_codeva-(.*).html",
+      "destination": "/baidu_verify_codeva-$1.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/baidu_verify_codeva-(.*).html",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ]
+}
