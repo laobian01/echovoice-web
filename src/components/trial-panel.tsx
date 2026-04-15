@@ -17,6 +17,11 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
   const [loginOpen, setLoginOpen] = useState(false);
   const [outOfCreditsOpen, setOutOfCreditsOpen] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [promoOpen, setPromoOpen] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoSuccess, setPromoSuccess] = useState<string | null>(null);
   const [roleId, setRoleId] = useState(roles[0].id);
   const [toneId, setToneId] = useState(tones[0].id);
   const [emotionId, setEmotionId] = useState(emotions[0].id);
@@ -122,6 +127,34 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
     setSessionToken(null);
     setUserEmail(null);
     setTrialRemaining(null);
+  };
+
+  const handleRedeem = async () => {
+    if (!promoCode.trim()) return;
+    setPromoLoading(true);
+    setPromoError(null);
+    setPromoSuccess(null);
+    try {
+      const res = await fetch("/api/promo/redeem", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${sessionToken}` 
+        },
+        body: JSON.stringify({ code: promoCode.trim() })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Redeem failed");
+      
+      setPromoSuccess(isEn ? `Success! +${data.reward} credits.` : `领取成功！已到账 ${data.reward} 次额度。`);
+      setTrialRemaining(data.remaining);
+      setPromoCode("");
+      setTimeout(() => setPromoOpen(false), 2000);
+    } catch (e: any) {
+      setPromoError(e.message);
+    } finally {
+      setPromoLoading(false);
+    }
   };
 
   const trackEvent = (name: string, params?: object) => {
@@ -305,6 +338,14 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
           {sessionToken && (
             <>
               <span className="mx-1">|</span>
+              <button 
+                onClick={() => { setPromoOpen(!promoOpen); setPromoError(null); setPromoSuccess(null); }} 
+                className="flex items-center gap-1 font-semibold text-emerald-600 hover:text-emerald-800 transition"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+                {isEn ? "Redeem Code" : "兑换码"}
+              </button>
+              <span className="mx-1">|</span>
               <button onClick={() => setShowInviteModal(true)} className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800 transition">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 {isEn ? "Invite & Get Credits" : "邀请送额度"}
@@ -369,6 +410,36 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
       {sessionToken && (
         <GenerationsList locale={locale} refreshTrigger={refreshHistory} />
       )}
+
+      {/* Promo Code Modal-like Inline Overlay */}
+      {promoOpen && (
+        <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                type="text"
+                placeholder={isEn ? "Enter code (e.g. JUEJIN2026)" : "输入兑换码 (如 JUEJIN2026)"}
+                className="flex-1 min-w-[200px] rounded-xl border border-emerald-200 bg-white px-4 py-2 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+              />
+              <button
+                disabled={promoLoading || !promoCode.trim()}
+                onClick={handleRedeem}
+                className="rounded-xl bg-emerald-600 px-6 py-2 text-sm font-bold text-white transition hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
+              >
+                {promoLoading ? (isEn ? "..." : "正在兑换...") : (isEn ? "Redeem" : "领取点数")}
+              </button>
+              <button onClick={() => setPromoOpen(false)} className="text-xs text-slate-400 hover:underline">
+                {isEn ? "Cancel" : "取消"}
+              </button>
+            </div>
+            {promoError && <p className="mt-2 text-xs text-rose-600 font-medium">⚠️ {promoError}</p>}
+            {promoSuccess && <p className="mt-2 text-xs text-emerald-600 font-bold">✨ {promoSuccess}</p>}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
+

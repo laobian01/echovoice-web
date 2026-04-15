@@ -3,7 +3,7 @@ import { getAllSlugs } from "@/lib/blog";
 import { voicesData, solutionsData } from "@/lib/seo-data";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://echovoiceai.net";
+  const base = "https://www.echovoiceai.net";
   const now = new Date();
   const locales = ["zh", "en"];
 
