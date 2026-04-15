@@ -332,7 +332,15 @@ export function TrialPanel({ locale = "zh" }: { locale?: Locale }) {
         </button>
         {audioUrl ? <audio controls src={audioUrl} className="h-9" /> : null}
         <span className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${sessionToken ? (isMember ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700") : "border-slate-200 bg-slate-50 text-slate-600"}`}>
-          {sessionToken ? (isMember ? (isEn ? "Pro Member" : "专业版会员") : (isEn ? "Logged in" : "已登录")) : (isEn ? "Not logged in" : "未登录")}
+          {sessionToken ? (isMember ? (isEn ? "Pro Member" : "专业版会员") : (isEn ? "Logged in" : "已登录")) : (
+            <button 
+              onClick={requestLogin} 
+              className="flex items-center gap-1 font-semibold text-emerald-600 hover:text-emerald-800 transition"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+              {isEn ? "Have a code? Login to redeem" : "我有兑换码？登录领取额度"}
+            </button>
+          )}
           {sessionToken && userEmail ? ` · ${userEmail}` : ""}
           {sessionToken ? ` · ${isMember ? (isEn ? "Credits" : "剩余额度") : (isEn ? "Trials left" : "剩余试用")}: ${trialRemaining ?? "?"}` : ""}
           {sessionToken && (

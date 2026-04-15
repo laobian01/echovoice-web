@@ -152,6 +152,12 @@ export function AuthModal({ isOpen, onClose, locale = "zh", initialMode = "login
               (isEn ? "Send Instructions" : "发送指令")
             )}
           </button>
+
+          {mode === "register" && (
+            <p className="mt-4 text-center text-xs text-slate-500">
+              {isEn ? "✨ Enter promo codes after signup to get bonus credits!" : "✨ 注册后输入兑换码即可领取额外试用额度"}
+            </p>
+          )}
         </form>
 
         <div className="mt-6 space-y-3 border-t border-slate-100 pt-5">
