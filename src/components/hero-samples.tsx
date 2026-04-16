@@ -11,7 +11,7 @@ const SAMPLES = [
     tag_en: "Cute & Energetic",
     text_zh: "欢迎来到灵动之声！今天也要元气满满哦！",
     text_en: "Welcome to EchoVoice! Let's have a great day!",
-    url: "https://pub-2325c34537334415897c88b9021239c0.r2.dev/samples/loli_welcome.mp3",
+    url: "https://openai-api-samples.s3.amazonaws.com/tts/shimmer.mp3",
   },
   {
     id: "warmman",
@@ -21,17 +21,17 @@ const SAMPLES = [
     tag_en: "Deep & Warm",
     text_zh: "不管走得多远，记得在这里，总有一盏灯为你而留。",
     text_en: "No matter how far you go, there is always a light left for you here.",
-    url: "https://pub-2325c34537334415897c88b9021239c0.r2.dev/samples/warm_healing.mp3",
+    url: "https://openai-api-samples.s3.amazonaws.com/tts/alloy.mp3",
   },
   {
     id: "movie",
-    name_zh: "解说小帅",
+    name_zh: "解说旗舰",
     name_en: "Charon (Narrator)",
-    tag_zh: "专业 · 节奏感",
-    tag_en: "Rhythmic & Pro",
+    tag_zh: "专业 · 沉稳",
+    tag_en: "Steady & Pro",
     text_zh: "注意看，这个男人叫小帅，他正在使用一款神奇的配音工具。",
     text_en: "Look at this man, his name is Xiaoshuai, and he's using a magical dubbing tool.",
-    url: "https://pub-2325c34537334415897c88b9021239c0.r2.dev/samples/jieshuo_pro.mp3",
+    url: "https://openai-api-samples.s3.amazonaws.com/tts/onyx.mp3",
   },
 ];
 

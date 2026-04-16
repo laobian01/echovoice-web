@@ -76,11 +76,27 @@ export async function POST(req: NextRequest) {
     const emotion = String(body.emotion || "平静");
     const roleDescription = String(body.roleDescription || "");
 
-    if (!text) {
-      return NextResponse.json({ error: "文本不能为空" }, { status: 400 });
-    }
+    const emotionInstructions: Record<string, string> = {
+      "平静": "语气自然、平稳，像是在进行日常对话。",
+      "开心": "语气欢快、明亮，语速略快，带有一丝笑意，充满活力。",
+      "悲伤": "语气低沉、缓慢，带有明显的哭腔或叹息感，情感深沉。",
+      "激动": "情绪高昂，声音洪亮，语速加快，富有冲击力和呼吸感。",
+      "严肃": "语气庄重、严厉，节奏分明，不苟言笑。",
+      "温暖": "语气轻柔、治愈，语速适中，富有磁性和关怀感。",
+      "治愈": "语气空灵、柔和，像是在耳边低语，带给人平静的力量。",
+      "坚定": "语气果断、有力，字正腔圆，充满自信和说服力。",
+    };
 
-    const prompt = `朗读以下文本。角色设定: ${roleDescription}。情感: ${emotion}。语速: ${speedLabel(speed)}，语调: ${pitchLabel(pitch)}。文本: ${text}`;
+    const actingInstruction = emotionInstructions[emotion] || emotionInstructions["平静"];
+
+    const prompt = `你是一个专业的配音演员。请按照以下要求朗读文本：
+角色设定: ${roleDescription}。
+表演要求: ${actingInstruction}
+语速控制: ${speedLabel(speed)}，语调控制: ${pitchLabel(pitch)}。
+请确保声音自然、流畅，具有鲜明的人类情感色彩，严禁机械感。
+
+待朗读文本: 
+${text}`;
 
     const payload: Record<string, unknown> = {
       text: prompt,
