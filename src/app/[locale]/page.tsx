@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TrialPanel } from "@/components/trial-panel";
 import { SiteHeader } from "@/components/site-header";
+import { FloatingPromo } from "@/components/floating-promo";
 import { Locale, normalizeLocale } from "@/lib/i18n";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -44,18 +45,29 @@ export default async function LocaleHome({ params }: Props) {
               ? "High-quality AI voice generator for creators. Role, tone and emotion control for TikTok, podcasts and e-learning."
               : "角色、语调、情绪自由组合，专为短视频垂直优化的文字转语音(TTS)工具。支持抖音配音、有声书朗读与广告口播。"}
           </p>
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-wrap items-center gap-4">
+            <div className="relative group">
+              <Link 
+                className="relative inline-flex items-center rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 bg-[length:200%_auto] px-8 py-4 font-bold text-white shadow-xl shadow-indigo-200 transition-all hover:scale-105 hover:shadow-indigo-300 animate-[gradient_3s_linear_infinite]" 
+                href={`/${l}/try`}
+              >
+                <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
+                {isEn ? "Start Free Trial" : "立即免费体验"}
+              </Link>
+              {/* Promo Badge */}
+              <div className="absolute -right-3 -top-3 flex h-7 scale-90 items-center rounded-full bg-amber-400 px-3 text-[10px] font-black uppercase tracking-wider text-amber-950 shadow-sm ring-2 ring-white animate-bounce">
+                {isEn ? "+100 Credits" : "注册送100次"}
+              </div>
+            </div>
+
             <a
-              className="rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 px-5 py-2.5 font-semibold !text-white shadow-sm shadow-indigo-200 transition hover:from-indigo-600 hover:to-blue-600"
+              className="rounded-2xl border border-slate-200 bg-white/50 px-6 py-4 font-semibold text-slate-700 backdrop-blur-sm transition hover:bg-white hover:text-indigo-600"
               href="https://apps.apple.com/app/id6758727921"
               target="_blank"
               rel="noreferrer"
             >
-              {isEn ? "Download Mac App" : "下载 Mac 版"}
+              {isEn ? "Mac App" : "下载 Mac 版"}
             </a>
-            <Link className="rounded-xl border border-white/60 bg-white/40 backdrop-blur-md px-6 py-2.5 font-semibold text-slate-700 shadow-sm transition hover:bg-white/60 hover:shadow" href={`/${l}/try`}>
-              {isEn ? "Try on Web" : "在线试用"}
-            </Link>
           </div>
         </section>
 
@@ -105,6 +117,7 @@ export default async function LocaleHome({ params }: Props) {
           </div>
         </footer>
       </main>
+      <FloatingPromo locale={l} />
     </div>
   );
 }
