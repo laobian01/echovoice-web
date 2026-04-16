@@ -136,6 +136,8 @@ export default function RootLayout({
     <html lang="zh-CN">
       <head>
         <meta name="baidu-site-verification" content="codeva-InL9RdOkuj" />
+        <meta name="mobile-agent" content="format=html5;url=https://www.echovoiceai.net/zh" />
+        <meta name="mobile-agent" content="format=xhtml;url=https://www.echovoiceai.net/zh" />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-N1Z2GDF29D"
           strategy="afterInteractive"

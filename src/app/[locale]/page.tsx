@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { TrialPanel } from "@/components/trial-panel";
 import { SiteHeader } from "@/components/site-header";
 import { FloatingPromo } from "@/components/floating-promo";
+import { HeroSamples } from "@/components/hero-samples";
 import { Locale, normalizeLocale } from "@/lib/i18n";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -69,6 +70,8 @@ export default async function LocaleHome({ params }: Props) {
               {isEn ? "Mac App" : "下载 Mac 版"}
             </a>
           </div>
+
+          <HeroSamples locale={l} />
         </section>
 
         <section className="mt-6 mb-12 relative z-10 w-full animate-in fade-in slide-in-from-bottom-6 duration-1000">

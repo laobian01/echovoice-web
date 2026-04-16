@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+
+# Baidu Specific
+User-agent: Baiduspider
+Allow: /
+Allow: /zh
+
+Sitemap: https://www.echovoiceai.net/sitemap.xml
